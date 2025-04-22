@@ -5,7 +5,7 @@ import rehypePrettyCode from 'rehype-pretty-code';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Buat bisa pake __dirname di ESM
+// Support __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -48,16 +48,24 @@ const withMDX = nextMDX({
 export default withMDX({
   reactStrictMode: true,
   images: {
-    domains: ['avatars.githubusercontent.com', 'i.scdn.co']
+    domains: ['avatars.githubusercontent.com', 'i.scdn.co'],
+    unoptimized: true // Added for static exports (if needed)
   },
   pageExtensions: ['ts', 'tsx', 'md', 'mdx'],
+  // Explicitly configure pages directory
+  experimental: {
+    appDir: false, // Disable App Router
+    pagesDir: path.join(__dirname, 'src/pages') // Point to custom pages location
+  },
+  // Enable static export if needed
+  output: 'export', // Optional: for static site generation
   webpack(config) {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       '@components': path.resolve(__dirname, 'src/components'),
       '@lib': path.resolve(__dirname, 'src/lib'),
-      '@pages': path.resolve(__dirname, 'src/pages'),
       '@public': path.resolve(__dirname, 'public')
+      // Removed @pages alias since we're using experimental.pagesDir
     };
     return config;
   }
